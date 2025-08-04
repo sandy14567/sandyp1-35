@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { productStorage, type Product } from '@/lib/storage';
 import { useToast } from '@/hooks/use-toast';
+import ImageUpload from '@/components/ImageUpload';
 
 export default function Products() {
   const [products, setProducts] = React.useState<Product[]>([]);
@@ -29,6 +30,7 @@ export default function Products() {
     stock: '',
     category: '',
     barcode: '',
+    image: undefined as string | undefined,
   });
 
   React.useEffect(() => {
@@ -62,6 +64,7 @@ export default function Products() {
       stock: '',
       category: '',
       barcode: '',
+      image: undefined,
     });
     setEditingProduct(null);
   };
@@ -84,6 +87,7 @@ export default function Products() {
       stock: parseInt(formData.stock),
       category: formData.category,
       barcode: formData.barcode || undefined,
+      image: formData.image,
     };
 
     if (editingProduct) {
@@ -112,6 +116,7 @@ export default function Products() {
       stock: product.stock.toString(),
       category: product.category,
       barcode: product.barcode || '',
+      image: product.image,
     });
     setEditingProduct(product);
     setIsAddDialogOpen(true);
@@ -155,65 +160,79 @@ export default function Products() {
                 Tambah Produk
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-2xl">
               <DialogHeader>
                 <DialogTitle>
                   {editingProduct ? 'Edit Produk' : 'Tambah Produk Baru'}
                 </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Nama Produk *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Masukkan nama produk"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="category">Kategori *</Label>
-                  <Input
-                    id="category"
-                    value={formData.category}
-                    onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                    placeholder="Masukkan kategori"
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Image Upload */}
                   <div>
-                    <Label htmlFor="price">Harga *</Label>
-                    <Input
-                      id="price"
-                      type="number"
-                      value={formData.price}
-                      onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                      placeholder="0"
-                      required
+                    <Label>Gambar Produk</Label>
+                    <ImageUpload
+                      value={formData.image}
+                      onChange={(url) => setFormData(prev => ({ ...prev, image: url }))}
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="stock">Stok *</Label>
-                    <Input
-                      id="stock"
-                      type="number"
-                      value={formData.stock}
-                      onChange={(e) => setFormData(prev => ({ ...prev, stock: e.target.value }))}
-                      placeholder="0"
-                      required
-                    />
+                  
+                  {/* Form Fields */}
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="name">Nama Produk *</Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                        placeholder="Masukkan nama produk"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="category">Kategori *</Label>
+                      <Input
+                        id="category"
+                        value={formData.category}
+                        onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                        placeholder="Masukkan kategori"
+                        required
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="price">Harga *</Label>
+                        <Input
+                          id="price"
+                          type="number"
+                          value={formData.price}
+                          onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                          placeholder="0"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="stock">Stok *</Label>
+                        <Input
+                          id="stock"
+                          type="number"
+                          value={formData.stock}
+                          onChange={(e) => setFormData(prev => ({ ...prev, stock: e.target.value }))}
+                          placeholder="0"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="barcode">Barcode</Label>
+                      <Input
+                        id="barcode"
+                        value={formData.barcode}
+                        onChange={(e) => setFormData(prev => ({ ...prev, barcode: e.target.value }))}
+                        placeholder="Masukkan barcode (opsional)"
+                      />
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <Label htmlFor="barcode">Barcode</Label>
-                  <Input
-                    id="barcode"
-                    value={formData.barcode}
-                    onChange={(e) => setFormData(prev => ({ ...prev, barcode: e.target.value }))}
-                    placeholder="Masukkan barcode (opsional)"
-                  />
                 </div>
                 <div className="flex gap-2 pt-4">
                   <Button type="submit" className="flex-1">
@@ -265,8 +284,18 @@ export default function Products() {
         {filteredProducts.map(product => (
           <Card key={product.id} className="shadow-card hover:shadow-lg transition-shadow">
             <CardContent className="p-4">
-              <div className="aspect-square bg-muted rounded-lg mb-3 flex items-center justify-center">
-                <Package className="h-12 w-12 text-muted-foreground" />
+              <div className="aspect-square bg-muted rounded-lg mb-3 overflow-hidden">
+                {product.image ? (
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Package className="h-12 w-12 text-muted-foreground" />
+                  </div>
+                )}
               </div>
               <h3 className="font-semibold mb-1 line-clamp-2">{product.name}</h3>
               <p className="text-sm text-muted-foreground mb-2">{product.category}</p>

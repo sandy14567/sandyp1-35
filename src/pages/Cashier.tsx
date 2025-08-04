@@ -168,9 +168,9 @@ export default function Cashier() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-4 lg:p-6">
+      <div className="flex flex-col xl:flex-row gap-4 p-4 h-screen">
         {/* Products Section */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="flex-1 space-y-4 overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-primary text-white rounded-xl p-6">
             <h1 className="text-2xl font-bold mb-2">Kasir</h1>
@@ -205,12 +205,22 @@ export default function Cashier() {
           </Card>
 
           {/* Products Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 overflow-y-auto flex-1">
             {filteredProducts.map(product => (
               <Card key={product.id} className="shadow-card hover:shadow-lg transition-shadow">
                 <CardContent className="p-4">
-                  <div className="aspect-square bg-muted rounded-lg mb-3 flex items-center justify-center">
-                    <Package className="h-12 w-12 text-muted-foreground" />
+                  <div className="aspect-square bg-muted rounded-lg mb-3 overflow-hidden">
+                    {product.image ? (
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Package className="h-12 w-12 text-muted-foreground" />
+                      </div>
+                    )}
                   </div>
                   <h3 className="font-semibold mb-1 line-clamp-2">{product.name}</h3>
                   <p className="text-sm text-muted-foreground mb-2">{product.category}</p>
@@ -246,8 +256,8 @@ export default function Cashier() {
         </div>
 
         {/* Cart Section */}
-        <div className="space-y-6">
-          <Card className="sticky top-4">
+        <div className="w-full xl:w-96 flex-shrink-0">
+          <Card className="h-full flex flex-col">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <ShoppingCart className="h-5 w-5" />

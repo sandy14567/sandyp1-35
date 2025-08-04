@@ -8,13 +8,17 @@ import {
   BarChart3, 
   Receipt,
   Menu,
-  X
+  X,
+  LogOut,
+  User
 } from 'lucide-react';
 import { Button } from './button';
 import { cn } from '@/lib/utils';
+import { authService } from '@/lib/auth';
 
 interface SidebarLayoutProps {
   children: React.ReactNode;
+  onLogout: () => void;
 }
 
 const navigation = [
@@ -26,9 +30,15 @@ const navigation = [
   { name: 'Laporan', href: '/reports', icon: BarChart3 },
 ];
 
-export function SidebarLayout({ children }: SidebarLayoutProps) {
+export function SidebarLayout({ children, onLogout }: SidebarLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const location = useLocation();
+  const currentUser = authService.getCurrentUser();
+
+  const handleLogout = () => {
+    authService.logout();
+    onLogout();
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -42,13 +52,16 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
 
       {/* Sidebar */}
       <div className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-slate-900 to-slate-800 transform transition-transform duration-300 ease-in-out lg:translate-x-0",
+        "fixed inset-y-0 left-0 z-50 w-72 bg-gradient-to-b from-slate-900 to-slate-800 transform transition-transform duration-300 ease-in-out lg:translate-x-0",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex h-full flex-col">
           {/* Logo */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700">
-            <h1 className="text-xl font-bold text-white">Modern POS</h1>
+            <div>
+              <h1 className="text-xl font-bold text-white">Modern POS</h1>
+              <p className="text-xs text-slate-400">Supermarket System</p>
+            </div>
             <Button
               variant="ghost"
               size="sm"
@@ -57,6 +70,19 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
             >
               <X className="h-5 w-5" />
             </Button>
+          </div>
+          
+          {/* User Info */}
+          <div className="px-6 py-3 bg-slate-800/50 border-b border-slate-700">
+            <div className="flex items-center gap-3">
+              <div className="bg-primary rounded-full p-2">
+                <User className="h-4 w-4 text-white" />
+              </div>
+              <div>
+                <p className="text-white font-medium text-sm">{currentUser?.name}</p>
+                <p className="text-slate-400 text-xs capitalize">{currentUser?.role}</p>
+              </div>
+            </div>
           </div>
 
           {/* Navigation */}
@@ -84,7 +110,16 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
 
           {/* Footer */}
           <div className="p-4 border-t border-slate-700">
-            <div className="text-xs text-slate-400 text-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full text-slate-300 hover:text-white hover:bg-slate-700 justify-start"
+              onClick={handleLogout}
+            >
+              <LogOut className="mr-3 h-4 w-4" />
+              Logout
+            </Button>
+            <div className="text-xs text-slate-400 text-center mt-3">
               Modern POS v1.0
             </div>
           </div>
@@ -92,7 +127,7 @@ export function SidebarLayout({ children }: SidebarLayoutProps) {
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-64">
+      <div className="lg:pl-72">
         {/* Mobile header */}
         <div className="sticky top-0 z-30 bg-white border-b border-gray-200 lg:hidden">
           <div className="flex items-center justify-between px-4 py-3">
