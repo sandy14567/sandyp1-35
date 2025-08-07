@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { productStorage, transactionStorage, type Product } from '@/lib/storage';
 import { useToast } from '@/hooks/use-toast';
+import Receipt from '@/components/Receipt';
 
 interface CartItem {
   product: Product;
@@ -27,6 +28,8 @@ export default function Cashier() {
   const [cart, setCart] = React.useState<CartItem[]>([]);
   const [searchTerm, setSearchTerm] = React.useState('');
   const [selectedCategory, setSelectedCategory] = React.useState<string>('');
+  const [showReceipt, setShowReceipt] = React.useState(false);
+  const [lastTransaction, setLastTransaction] = React.useState<any>(null);
   const { toast } = useToast();
 
   React.useEffect(() => {
@@ -137,10 +140,30 @@ export default function Cashier() {
       cashierId: 'cashier-1', // In real app, this would be the logged-in user
     });
 
+    // Store transaction for receipt
+    setLastTransaction({
+      id: transaction.id,
+      items: cart.map(item => ({
+        productName: item.product.name,
+        quantity: item.quantity,
+        price: item.product.price,
+        total: item.product.price * item.quantity,
+      })),
+      subtotal,
+      tax,
+      total,
+      paymentMethod,
+      timestamp: new Date(),
+      cashierName: 'Admin' // In real app, get from logged-in user
+    });
+
     toast({
       title: "Transaksi berhasil",
       description: `Transaksi ${transaction.id.slice(0, 8)} telah disimpan`,
     });
+
+    // Show receipt
+    setShowReceipt(true);
 
     // Update products state to reflect new stock
     setProducts(prev => 
@@ -367,6 +390,22 @@ export default function Cashier() {
           </Card>
         </div>
       </div>
+
+      {/* Receipt Modal */}
+      {showReceipt && lastTransaction && (
+        <Receipt
+          isOpen={showReceipt}
+          onClose={() => setShowReceipt(false)}
+          transactionId={lastTransaction.id}
+          items={lastTransaction.items}
+          subtotal={lastTransaction.subtotal}
+          tax={lastTransaction.tax}
+          total={lastTransaction.total}
+          paymentMethod={lastTransaction.paymentMethod}
+          timestamp={lastTransaction.timestamp}
+          cashierName={lastTransaction.cashierName}
+        />
+      )}
     </div>
   );
 }
